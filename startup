@@ -5,9 +5,7 @@ mkdir -p /export/mongodb
 mongod --fork --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all
 
 # dmeta dportal dsso
-
-
-if [ ! -d "/export/dsso" ]; then
+if [ ! -d "/export/dsso" -a ! -L "/export/dsso" ]; then
    git clone https://github.com/UMMS-Biocore/dsso.git /export/dsso && npm install -C /export/dsso && npm audit fix -C /export/dsso && ln -s /export/dsso /var/www/html/.
 else 
    rm -rf /var/www/html/dsso && ln -s /export/dsso /var/www/html/.
@@ -54,8 +52,7 @@ fi
 
 mongo < /usr/local/bin/mongoinit.js 1> /dev/null
 
-#sudo env PATH=$PATH:`dirname $(which pm2)` pm2 startup  -u root
-#sudo pm2 save
+# Start DMETA DPORTAL DSSO with pm2
 cd /var/www/html/dmeta && pm2 restart pm2-process.json
 cd /var/www/html/dportal &&  pm2 restart pm2-process.json
 cd /var/www/html/dsso && pm2 restart pm2-process.json

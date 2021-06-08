@@ -21,7 +21,8 @@ dnext = {
   "trustedClient": true,
   "scope": [""]
 }
+
 use dsso;
-db.clients.update({'clientId':'dmeta-co3h3j39f'}, dmeta, upsert=true); 
-db.clients.update({'clientId':'dportal-c2ss3j39f'}, dportal, upsert=true); 
-db.clients.update({'clientId':'dnext-c45df5fhj'}, dnext, upsert=true); 
+db.clients.update({'clientId':'dmeta-co3h3j39f'}, { $setOnInsert:dmeta}, upsert=true); 
+db.clients.update({'clientId':'dportal-c2ss3j39f'},{ $setOnInsert: dportal}, upsert=true); 
+db.clients.update({'clientId':'dnext-c45df5fhj'},{ $setOnInsert: dnext}, upsert=true); 
