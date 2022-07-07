@@ -3,7 +3,8 @@
 # start mongodb
 mkdir -p /export/mongodb
 mongod --fork --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all
-mongo admin --eval "if (db.getUser('docker') == null) { db.getSiblingDB('admin').createUser({user: 'docker', pwd: 'docker', roles: [ 'userAdminAnyDatabase']})}"
+mongo < /usr/local/bin/mongoinit.js 1> /dev/null
+mongo admin --eval "if (db.getUser('docker') == null) { db.getSiblingDB('admin').createUser({user: 'docker', pwd: 'docker', roles: [ 'root']})}"
 mongod --shutdown --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all 
 mongod --fork --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all --auth
 
@@ -53,7 +54,6 @@ if [ ! -f /var/www/html/dportal/certs/privatekey.pem ]; then
    mkcert -cert-file /var/www/html/dportal/certs/certificate.pem -key-file /var/www/html/dportal/certs/privatekey.pem localhost
 fi
 
-mongo < /usr/local/bin/mongoinit.js 1> /dev/null
 mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dsso').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
 mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dmeta').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
 mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dportal').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
