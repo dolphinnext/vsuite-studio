@@ -81,7 +81,7 @@ fi
 
 /usr/local/bin/user_add.sh
 
-find /var/lib/mysql -type f -exec touch {} \; && service mysql start 
+find /var/lib/mysql -type f -exec touch {} \; && sudo service mysql start 
 #Start ssh
 service ssh start
 #Sendmail service start
