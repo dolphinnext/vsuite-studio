@@ -12,6 +12,7 @@ RUN npm install nodemon -g
 RUN npm install -g n
 RUN npm install pm2 -g
 RUN n 14.2.0
+RUN npm install -g npm@6.14.4
 RUN PATH="$PATH"
 
 ARG MONGO_PACKAGE=mongodb-org
