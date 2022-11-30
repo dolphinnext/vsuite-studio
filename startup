@@ -5,6 +5,7 @@ mkdir -p /export/mongodb
 mongod --fork --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all
 mongo < /usr/local/bin/mongoinit.js 1> /dev/null
 mongo admin --eval "if (db.getUser('docker') == null) { db.getSiblingDB('admin').createUser({user: 'docker', pwd: 'docker', roles: [ 'root']})}"
+mongo admin -u docker -p docker --eval 'db.grantRolesToUser ( "docker", [ { role: "__system", db: "admin" } ] )' --authenticationDatabase admin
 mongod --shutdown --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all 
 mongod --fork --logpath /var/log/mongodb.log --dbpath /export/mongodb --bind_ip_all --auth
 
@@ -15,26 +16,41 @@ else
    rm -rf /var/www/html/dsso && ln -s /export/dsso /var/www/html/.
 fi
 
-if [ ! -d /export/dmeta ]; then
-   git clone https://github.com/UMMS-Biocore/dmeta.git /export/dmeta && npm install -C /export/dmeta && npm audit fix -C /export/dmeta && ln -s /export/dmeta /var/www/html/.
+if [ ! -d /export/vmeta ]; then
+   git clone https://github.com/UMMS-Biocore/vmeta.git /export/vmeta && npm install -C /export/vmeta && npm audit fix -C /export/vmeta && ln -s /export/vmeta /var/www/html/.
 else 
-   rm -rf /var/www/html/dmeta && ln -s /export/dmeta /var/www/html/.
+   rm -rf /var/www/html/vmeta && ln -s /export/vmeta /var/www/html/.
 fi
 
-if [ ! -d /export/dportal ]; then
+if [ ! -d /export/vportal ]; then
    git clone https://github.com/UMMS-Biocore/dportal.git /export/dportal && npm install -C /export/dportal && npm audit fix -C /export/dportal && ln -s /export/dportal /var/www/html/.
 else 
-   rm -rf /var/www/html/dportal && ln -s /export/dportal /var/www/html/.
+   rm -rf /var/www/html/vportal && ln -s /export/vportal /var/www/html/.
+fi
+
+if [ ! -d /export/vfoundry ]; then
+   git clone https://github.com/ViaScientific/vfoundry.git /export/vfoundry && npm install -C /export/vfoundry && npm audit fix -C /export/vfoundry && ln -s /export/vfoundry /var/www/html/.
+else
+   rm -rf /var/www/html/vfoundry && ln -s /export/vfoundry /var/www/html/.
+fi
+
+if [ ! -d /export/vpipe ]; then
+   git clone https://github.com/ViaScientific/vpipe.git /export/vpipe &&  ln -s /export/vpipe /var/www/html/.
+else
+   rm -rf /var/www/html/vpipe && ln -s /export/vpipe /var/www/html/.
 fi
 
 if [ ! -f /var/www/html/dmeta/config.env ]; then
    cp /var/www/html/dmeta/docs/templates/template.config.env /var/www/html/dmeta/config.env
 fi
-if [ ! -f /var/www/html/dportal/config.env ]; then
-   cp /var/www/html/dportal/docs/template.config.env /var/www/html/dportal/config.env
+if [ ! -f /var/www/html/vportal/config.env ]; then
+   cp /var/www/html/vportal/docs/template.config.env /var/www/html/vportal/config.env
 fi
 if [ ! -f /var/www/html/dsso/config.env ]; then
    cp /var/www/html/dsso/docs/template.config.env /var/www/html/dsso/config.env
+fi
+if [ ! -f /var/www/html/vfoundry/config.env ]; then
+   cp /var/www/html/vfoundry/docs/template.config.env /var/www/html/vfoundry/config.env
 fi
 
 # certificates
@@ -48,21 +64,24 @@ if [ ! -f /var/www/html/dsso/certs/privatekey.pem ]; then
    mkcert -install && \
    mkcert -cert-file /var/www/html/dsso/certs/certificate.pem -key-file /var/www/html/dsso/certs/privatekey.pem localhost
 fi
-if [ ! -f /var/www/html/dportal/certs/privatekey.pem ]; then
-   export CAROOT="/var/www/html/dportal/certs/" && \
+if [ ! -f /var/www/html/vportal/certs/privatekey.pem ]; then
+   export CAROOT="/var/www/html/vportal/certs/" && \
    mkcert -install && \
-   mkcert -cert-file /var/www/html/dportal/certs/certificate.pem -key-file /var/www/html/dportal/certs/privatekey.pem localhost
+   mkcert -cert-file /var/www/html/vportal/certs/certificate.pem -key-file /var/www/html/vportal/certs/privatekey.pem localhost
 fi
 
 mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dsso').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
-mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dmeta').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
-mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('dportal').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
+mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('vmeta').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
+mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('vportal').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
+mongo -u "docker" -p "docker" --authenticationDatabase "admin" --eval "if (db.getUser('docker') == null) { db.getSiblingDB('vfoundry').createUser({user: 'docker', pwd: 'docker', roles: [ 'dbOwner' ]})}"
+
+
 
 # Start DMETA DPORTAL DSSO with pm2
-cd /var/www/html/dmeta && pm2 restart pm2-process.json
-cd /var/www/html/dportal &&  pm2 restart pm2-process.json
+cd /var/www/html/vmeta && pm2 restart pm2-process.json
+cd /var/www/html/vportal &&  pm2 restart pm2-process.json
 cd /var/www/html/dsso && pm2 restart pm2-process.json
-
+cd /var/www/html/vfoundry && pm2 restart pm2-process.json
 
 ### APACHE SERVER
 source /etc/apache2/envvars

@@ -22,7 +22,16 @@ dnext = {
   "scope": [""]
 }
 
+vfoundry = {
+  "name": "Vfoundry Server",
+  "clientId": "vfoundry-mr83m30dse",
+  "clientSecret": "vfoundry-0kejuenva83w",
+  "trustedClient": true,
+  "scope": [""]
+}
+
 use dsso;
 db.clients.update({'clientId':'dmeta-co3h3j39f'}, { $setOnInsert:dmeta}, upsert=true); 
 db.clients.update({'clientId':'dportal-c2ss3j39f'},{ $setOnInsert: dportal}, upsert=true); 
 db.clients.update({'clientId':'dnext-c45df5fhj'},{ $setOnInsert: dnext}, upsert=true); 
+db.clients.update({'clientId':'vfoundry-mr83m30dse'},{ $setOnInsert: vfoundry}, upsert=true);

@@ -41,6 +41,10 @@ RUN sudo apt-get install -y mongodb-org
 #RUN apt-get install -y wget  libnspr4 libnss3 libnss3-nssdb libnss3-tools
 RUN export VER="v1.4.3" && wget -O mkcert https://github.com/FiloSottile/mkcert/releases/download/${VER}/mkcert-${VER}-linux-amd64 && \
     chmod +x mkcert && mv mkcert /usr/local/bin
+
+# for https support at localhost
+RUN sed -i  "/Directory>/a <Directory /var/www/>\nOptions Indexes FollowSymLinks\nAllowOverRide All\nRequire all granted\n</Directory>\n" /etc/apache2/sites-enabled/default-ssl.conf
+
 ADD startup /usr/local/bin/startup
 ADD mongoinit.js /usr/local/bin/mongoinit.js
 
